@@ -1,0 +1,3 @@
+[workspace]
+resolver = "3"
+members = ["checkers_cli","checkers_engine"]
