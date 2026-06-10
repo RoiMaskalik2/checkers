@@ -76,7 +76,6 @@ impl Position {
         Ok(())
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;

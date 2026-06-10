@@ -14,6 +14,8 @@ mod piece;
 mod position;
 mod state;
 
+/// Figure out what should be public - for example: the Board struct should not be a public API
+pub use board::{Board, Move};
 pub use err::{Error, Result};
 pub use piece::{Piece, PieceType};
 pub use position::{MovementDirection, Position};
