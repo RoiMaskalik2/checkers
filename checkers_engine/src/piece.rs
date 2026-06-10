@@ -4,7 +4,7 @@
 use crate::{
     Error,
     MovementDirection::{self, DownLeft, DownRight, UpLeft, UpRight},
-    Result,
+    Player, Result,
 };
 
 /// Represents a type of checkers piece
@@ -15,16 +15,6 @@ pub enum PieceType {
 
     /// Has special movement in the board
     King,
-}
-
-/// Represents the type of players that play a checkers game
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Player {
-    /// Has black checkers pieces
-    Black,
-
-    /// Has white checkers pieces
-    White,
 }
 
 /// Represents playable piece in a checkers board
@@ -127,17 +117,6 @@ mod test {
             white_king.valid_move_directions(),
             vec![DownLeft, DownRight, UpLeft, UpRight]
         );
-
-        Ok(())
-    }
-
-    #[test]
-    fn not_player() -> Result<()> {
-        let player = !Player::White;
-        assert_eq!(player, Player::Black);
-
-        let player = !Player::Black;
-        assert_eq!(player, Player::White);
 
         Ok(())
     }

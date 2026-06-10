@@ -15,5 +15,6 @@ mod position;
 mod state;
 
 pub use err::{Error, Result};
+pub use piece::{Piece, PieceType};
 pub use position::{MovementDirection, Position};
-pub use piece::{Piece, PieceType, Player};
+pub use state::{Player, State, TurnState, WinState};
