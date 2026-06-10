@@ -8,6 +8,8 @@ use crate::{
 /// Represents a range of valid board positions (between 0-7 in both AXES of the board)
 const VALID_POSITION_RANGE: std::ops::Range<u8> = 0..BOARD_SIZE;
 
+/// Represents all valid movement directions in a checkers game
+#[derive(Debug, PartialEq)]
 pub enum MovementDirection {
     /// Move position up and right in the board
     UpRight,
@@ -28,10 +30,10 @@ pub enum MovementDirection {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Position {
     /// The absolute row in the board
-    row: u8,
+    pub row: u8,
 
     /// The absolute column in the board
-    column: u8,
+    pub column: u8,
 }
 
 impl Position {
@@ -167,27 +169,98 @@ mod tests {
     }
 
     #[test]
-    fn fail_move_out_of_border() {
-        let edge_cases = [
-            // right border
-            (Position { row: 6, column: 7 }, MovementDirection::UpRight),
-            (Position { row: 6, column: 7 }, MovementDirection::DownRight),
-            // upper border
-            (Position { row: 7, column: 6 }, MovementDirection::UpLeft),
-            (Position { row: 7, column: 6 }, MovementDirection::UpRight),
-            // left border
-            (Position { row: 1, column: 0 }, MovementDirection::UpLeft),
-            (Position { row: 1, column: 0 }, MovementDirection::DownLeft),
-            // lower border
-            (Position { row: 0, column: 1 }, MovementDirection::DownLeft),
-            (Position { row: 0, column: 1 }, MovementDirection::DownRight),
-        ];
+    fn fail_move_right_border_up_right() {
+        let position = Position {
+            row: BOARD_SIZE / 2,
+            column: BOARD_SIZE - 1,
+        };
+        assert!(matches!(
+            position.step(MovementDirection::UpRight),
+            Err(Error::InvalidPosition)
+        ));
+    }
 
-        for (position, direction) in edge_cases {
-            assert!(
-                matches!(position.step(direction), Err(Error::InvalidPosition)),
-                "{position:?}"
-            );
-        }
+    #[test]
+    fn fail_move_right_border_down_right() {
+        let position = Position {
+            row: BOARD_SIZE / 2,
+            column: BOARD_SIZE - 1,
+        };
+        assert!(matches!(
+            position.step(MovementDirection::DownRight),
+            Err(Error::InvalidPosition)
+        ));
+    }
+
+    #[test]
+    fn fail_move_upper_border_up_left() {
+        let position = Position {
+            row: BOARD_SIZE - 1,
+            column: BOARD_SIZE / 2,
+        };
+        assert!(matches!(
+            position.step(MovementDirection::UpLeft),
+            Err(Error::InvalidPosition)
+        ));
+    }
+
+    #[test]
+    fn fail_move_upper_border_up_right() {
+        let position = Position {
+            row: BOARD_SIZE - 1,
+            column: BOARD_SIZE / 2,
+        };
+        assert!(matches!(
+            position.step(MovementDirection::UpRight),
+            Err(Error::InvalidPosition)
+        ));
+    }
+
+    #[test]
+    fn fail_move_left_border_up_left() {
+        let position = Position {
+            row: BOARD_SIZE / 2,
+            column: 0,
+        };
+        assert!(matches!(
+            position.step(MovementDirection::UpLeft),
+            Err(Error::InvalidPosition)
+        ));
+    }
+
+    #[test]
+    fn fail_move_left_border_down_left() {
+        let position = Position {
+            row: BOARD_SIZE / 2,
+            column: 0,
+        };
+        assert!(matches!(
+            position.step(MovementDirection::DownLeft),
+            Err(Error::InvalidPosition)
+        ));
+    }
+
+    #[test]
+    fn fail_move_lower_border_down_left() {
+        let position = Position {
+            row: 0,
+            column: BOARD_SIZE / 2,
+        };
+        assert!(matches!(
+            position.step(MovementDirection::DownLeft),
+            Err(Error::InvalidPosition)
+        ));
+    }
+
+    #[test]
+    fn fail_move_lower_border_down_right() {
+        let position = Position {
+            row: 0,
+            column: BOARD_SIZE / 2,
+        };
+        assert!(matches!(
+            position.step(MovementDirection::DownRight),
+            Err(Error::InvalidPosition)
+        ));
     }
 }

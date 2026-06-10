@@ -7,6 +7,10 @@ pub enum Error {
     /// Position is not in the valid board range (between 0-7 in both AXES of the board)
     #[error("{self:?}")]
     InvalidPosition,
+    // ---- piece module --------------------------------------------
+    /// An attempt to convert a piece to a king where the piece was already a king
+    #[error("{self:?}")]
+    InvalidKingUpgrade,
 }
 
 /// Type alias for the Result enum so that callers will not need to include the error enum in it.
