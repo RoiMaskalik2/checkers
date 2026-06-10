@@ -1,14 +1,18 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+//! Checkers Engine
+//!
+//! Exports the building blocks for interacting with a checkers engine
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+/// TODO: Figure how which of them should be public and which should not
+mod board;
+mod consts;
+mod engine;
+mod err;
+mod piece;
+mod position;
+mod state;
+
+pub use err::{Error, Result};
+pub use position::{MovementDirection, Position};
