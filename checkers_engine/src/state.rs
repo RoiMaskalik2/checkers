@@ -1,6 +1,6 @@
 //! This module represents the different states a checkers game can be in.
 
-use crate::Position;
+use crate::position::Position;
 
 /// Represents the type of players that play a checkers game
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -13,6 +13,7 @@ pub enum Player {
 }
 
 /// Represents the state of a checkers game
+#[derive(Debug, Clone, Copy)]
 pub enum State {
     /// The game has ended
     GameOver(WinState),
@@ -22,6 +23,7 @@ pub enum State {
 }
 
 /// Represents the state of the game when it has finished
+#[derive(Debug, Clone, Copy)]
 pub enum WinState {
     /// Some player has won the game.
     Win(Player),
@@ -31,6 +33,7 @@ pub enum WinState {
 }
 
 /// Represents the state of the game when it is ongoing
+#[derive(Debug, Clone, Copy)]
 pub enum TurnState {
     /// The game is being played and it is a regular turn
     RegularTurn,

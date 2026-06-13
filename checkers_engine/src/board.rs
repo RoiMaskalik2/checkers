@@ -2,10 +2,13 @@
 /// A checkers board position will be represented by an absolute (x,y) point.
 /// Meaning - It won't change with perspective on the board
 /// Also, the board is a squared board, meaning there is an equal amount of cells in each axis
-use crate::{Error, Piece, PieceType, Player, Position, Result, consts::BOARD_SIZE, piece};
+use crate::consts::BOARD_SIZE;
+use crate::piece::{Piece, PieceType};
+use crate::position::Position;
+use crate::state::Player;
 
 /// Represents a position that will grant access to a cell on the board.
-type Cell = Option<Piece>;
+pub type Cell = Option<Piece>;
 
 /// Each piece type starts with 3 full rows
 const STARTING_PIECE_ROWS: u8 = 3;
@@ -22,12 +25,14 @@ const BLACK_CHECKERS_SQUARES: u8 = 0;
 
 /// Represents a checkers board container
 /// NOTE: a board will not contain checkers logic and will be used as a container of all of the data.
-pub struct Board {
+#[derive(Debug)]
+pub(crate) struct Board {
     /// None Represents that a board cell is empty and does not contain a piece
     board: [[Cell; BOARD_SIZE as usize]; BOARD_SIZE as usize],
 }
 
 /// Represents a single move on a checkers board.
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Move {
     /// Initial position
     pub initial_position: Position,
@@ -38,23 +43,41 @@ pub struct Move {
 
 impl Board {
     /// Initializes a board to starting checkers state
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self::initialize_checkers_board()
+    }
+
+    /// Initializes a board with no pieces
+    #[cfg(test)]
+    pub(crate) fn empty() -> Self {
+        Self {
+            board: [[None; BOARD_SIZE as usize]; BOARD_SIZE as usize],
+        }
     }
 
     /// Takes a [`Move`], "cuts" the cell on the initial position of the move
     /// And overrides the cell in the target position with it.
-    pub fn move_cell(&mut self, board_move: Move) {
+    pub(crate) fn move_cell(&mut self, board_move: Move) {
         let moved_cell = self.pop_cell(board_move.initial_position);
         self[board_move.target_position] = moved_cell;
     }
 
-    /// Returns a vector of all of the cell's that represents this board
-    pub fn cells(&self) -> Vec<(Position, Cell)> {
-        (0..BOARD_SIZE)
-            .flat_map(|row| (0..BOARD_SIZE).map(move |column| Position { row, column }))
-            .map(|pos| (pos, self[pos]))
-            .collect()
+    /// Returns a vector of all of the cells that represents this board
+    pub(crate) fn cells(&self) -> Vec<(Position, Cell)> {
+        let mut cells = Vec::new();
+        for row in 0..BOARD_SIZE {
+            for column in 0..BOARD_SIZE {
+                let position = Position { row, column };
+                cells.push((position, self[position]));
+            }
+        }
+
+        cells
+    }
+
+    /// Overrides the cell of the given position with an empty cell (None)
+    pub(crate) fn clear_cell(&mut self, position: Position) {
+        self[position] = None;
     }
 
     // Implemented to keep the "new" constructor clean
@@ -120,7 +143,7 @@ mod tests {
     }
 
     #[test]
-    fn new_board_empty_cell_at_non_black_square() {
+    fn new_board_empty_cell_at_non_black_MovingEmptyCell() {
         let board = Board::new();
         assert_eq!(board[Position { row: 0, column: 1 }], None);
     }
@@ -189,7 +212,7 @@ mod tests {
         let target_position = Position { row: 1, column: 2 };
         let expected = board[initial_position];
 
-        // make the target was something other than the source
+        // make sure the target was something other than the source
         assert_ne!(board[initial_position], board[target_position]);
 
         board.move_cell(Move {

@@ -1,11 +1,9 @@
 //! This module represents the pieces that are being played in checkers
 //! It includes the functionality of upgrading a piece type or dictating the type of movement a piece can do.
 
-use crate::{
-    Error,
-    MovementDirection::{self, DownLeft, DownRight, UpLeft, UpRight},
-    Player, Result,
-};
+use crate::err::{Error, Result};
+use crate::position::MovementDirection::{self, DownLeft, DownRight, UpLeft, UpRight};
+use crate::state::Player;
 
 /// Represents a type of checkers piece
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -22,6 +20,7 @@ pub enum PieceType {
 pub struct Piece {
     /// Represents the owner of the piece
     pub owner: Player,
+
     /// Dictates the type of movement the piece can do
     pub piece_type: PieceType,
 }
@@ -30,19 +29,19 @@ impl Piece {
     /// Calculates the valid movements of a piece, the move direction is absolute :
     /// * Black pieces are starting down and advancing up
     /// * White pieces are starting up and advancing down
-    pub fn valid_move_directions(&self) -> Vec<MovementDirection> {
-        if let PieceType::King = self.piece_type {
+    pub(crate) fn valid_move_directions(&self) -> Vec<MovementDirection> {
+        if self.piece_type == PieceType::King {
             return vec![UpLeft, UpRight, DownLeft, DownRight];
         }
 
         match self.owner {
-            Player::Black => vec![DownRight, DownLeft],
-            Player::White => vec![UpRight, UpLeft],
+            Player::Black => vec![UpRight, UpLeft],
+            Player::White => vec![DownRight, DownLeft],
         }
     }
 
     /// Upgrades a regular piece to a king, returns an error if the piece is already a king
-    pub fn upgrade_to_king(&mut self) -> Result<()> {
+    pub(crate) fn upgrade_to_king(&mut self) -> Result<()> {
         if self.piece_type == PieceType::King {
             return Err(Error::InvalidKingUpgrade);
         }
@@ -75,7 +74,7 @@ mod test {
             owner: Player::White,
         };
 
-        assert_eq_unordered!(piece.valid_move_directions(), vec![UpRight, UpLeft]);
+        assert_eq_unordered!(piece.valid_move_directions(), vec![DownRight, DownLeft]);
 
         Ok(())
     }
@@ -87,7 +86,7 @@ mod test {
             owner: Player::Black,
         };
 
-        assert_eq_unordered!(piece.valid_move_directions(), vec![DownLeft, DownRight]);
+        assert_eq_unordered!(piece.valid_move_directions(), vec![UpRight, UpLeft]);
 
         Ok(())
     }
@@ -128,6 +127,7 @@ mod test {
             owner: Player::Black,
         };
         piece.upgrade_to_king()?;
+        assert_eq!(piece.piece_type, PieceType::King);
 
         let second_upgrade_result = piece.upgrade_to_king();
         assert!(matches!(

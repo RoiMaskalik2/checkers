@@ -1,16 +1,14 @@
 //! This module represents the positioning and basic rules of movement in checkers
 
-use crate::{
-    Error, Result,
-    consts::{BOARD_SIZE, NEGATIVE_MOVEMENT, POSITIVE_MOVEMENT},
-};
+use crate::consts::{BOARD_SIZE, NEGATIVE_MOVEMENT, POSITIVE_MOVEMENT};
+use crate::err::{Error, Result};
 
 /// Represents a range of valid board positions (between 0-7 in both AXES of the board)
 const VALID_POSITION_RANGE: std::ops::Range<u8> = 0..BOARD_SIZE;
 
 /// Represents all valid movement directions in a checkers game
-#[derive(Debug, PartialEq)]
-pub enum MovementDirection {
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub(crate) enum MovementDirection {
     /// Move position up and right in the board
     UpRight,
 
@@ -39,7 +37,7 @@ pub struct Position {
 impl Position {
     /// Calculates a new position given a movement direction
     /// Returns an error if the movement direction results in an invalid position
-    pub fn step(&self, direction: MovementDirection) -> Result<Position> {
+    pub(crate) fn step(&self, direction: MovementDirection) -> Result<Position> {
         let (row_change, column_change) = match direction {
             MovementDirection::DownLeft => (NEGATIVE_MOVEMENT, NEGATIVE_MOVEMENT),
             MovementDirection::DownRight => (NEGATIVE_MOVEMENT, POSITIVE_MOVEMENT),
@@ -66,7 +64,7 @@ impl Position {
     /// Validates a position
     /// Position is valid if it is not outside of a checkers board
     /// Meaning - both the axes of the position are between 0-7
-    pub fn validate(position: Position) -> Result<()> {
+    pub(crate) fn validate(position: Position) -> Result<()> {
         if !(VALID_POSITION_RANGE.contains(&position.row)
             && VALID_POSITION_RANGE.contains(&position.column))
         {
