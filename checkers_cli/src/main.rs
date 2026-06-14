@@ -1,3 +1,6 @@
+use checkers_engine::CheckersEngine;
+
 fn main() {
-    println!("Hello, world!");
+    let engine = CheckersEngine::new();
+    println!("{engine}");
 }

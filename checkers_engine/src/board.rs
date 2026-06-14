@@ -132,6 +132,40 @@ impl std::ops::IndexMut<Position> for Board {
     }
 }
 
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        const BLACK_SQUARE: &str = "\x1b[48;2;62;96;111m";
+        const WHITE_SQUARE: &str = "\x1b[48;2;193;198;200m";
+        const RESET_FORMAT: &str = "\x1b[0m";
+
+        write!(f, "    ")?;
+        for column_index in 0..BOARD_SIZE {
+            write!(f, " {column_index} ")?;
+        }
+        writeln!(f)?;
+
+        for row in 0..BOARD_SIZE {
+            write!(f, "{row}   ")?;
+            for column in 0..BOARD_SIZE {
+                if (row + column) % 2 == BLACK_CHECKERS_SQUARES {
+                    let piece = match self[Position { row, column }] {
+                        None => "  ",
+                        Some(piece) => &format!("{piece}"),
+                    };
+
+                    write!(f, "{BLACK_SQUARE}{piece} {RESET_FORMAT}")?;
+                } else {
+                    write!(f, "{WHITE_SQUARE}   {RESET_FORMAT}")?;
+                }
+            }
+
+            writeln!(f)?;
+        }
+
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

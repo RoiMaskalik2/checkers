@@ -62,6 +62,33 @@ impl std::ops::Not for Player {
     }
 }
 
+impl std::fmt::Display for Piece {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let piece = match self {
+            Piece {
+                piece_type: PieceType::Regular,
+                owner: Player::Black,
+            } => "⚫️",
+            Piece {
+                piece_type: PieceType::King,
+                owner: Player::Black,
+            } => "🜲",
+            Piece {
+                piece_type: PieceType::Regular,
+                owner: Player::White,
+            } => "⚪️",
+            Piece {
+                piece_type: PieceType::King,
+                owner: Player::White,
+            } => "♛",
+        };
+
+        write!(f, "{piece}")?;
+
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

@@ -9,7 +9,7 @@ use crate::board::{Board, Cell, Move};
 use crate::err::{Error, Result};
 use crate::logic::{self, MoveType, ValidMove};
 use crate::position::Position;
-use crate::state::{Player, State, TurnState};
+use crate::state::{Player, State, TurnState, WinState};
 
 /// Provides all of the functionalities explained in the module documentation
 pub struct CheckersEngine {
@@ -107,6 +107,31 @@ impl CheckersEngine {
 impl Default for CheckersEngine {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl std::fmt::Display for CheckersEngine {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let fmt_state = match self.current_state {
+            State::GameOver(WinState::Draw) => "It's A Draw!",
+            State::GameOver(WinState::Win(Player::Black)) => "Black Player Won!",
+            State::GameOver(WinState::Win(Player::White)) => "White Player Won!",
+            State::NotFinished(_, Player::Black) => &format!(
+                "Black Player Turn: {} Turns With No Eat",
+                self.turns_since_last_eat
+            ),
+            State::NotFinished(_, Player::White) => &format!(
+                "White Player Turn: {} Turns With No Eat",
+                self.turns_since_last_eat
+            ),
+        };
+
+        let board = &self.board;
+
+        writeln!(f, "{fmt_state}")?;
+        writeln!(f, "{board}")?;
+
+        Ok(())
     }
 }
 
