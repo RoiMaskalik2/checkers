@@ -15,19 +15,19 @@ pub enum Error {
 
     // ---- engine module --------------------------------------------
     /// An attempt to play a checkers game when the game has finished
-    #[error("{self:?}")]
+    #[error("Error: The game has finished and no additional moves can be performed")]
     FinishedGame,
     /// An attempt to play a checkers turn with the wrong player
-    #[error("{self:?}")]
+    #[error("Error: This player should not play this turn")]
     InvalidPlayerTurn,
     /// An attempt to perform a move that is not valid in checkers
-    #[error("{self:?}")]
+    #[error("Error: This move is not a valid move")]
     InvalidMove,
     /// An attempt to move from a board cell that does not contain a piece
-    #[error("{self:?}")]
+    #[error("Error: You have tried to move a piece that does not exist")]
     MovingEmptyCell,
     /// An attempt to move a piece that is not owned by the current player
-    #[error("{self:?}")]
+    #[error("Error: You have tried to move an enemy piece")]
     MovingEnemyPiece,
 
     // ---- logic module --------------------------------------------
