@@ -4,12 +4,33 @@
 //! 2. Player turn and move validation
 //! 3. Receiving the state of the game
 //! 4. Receiving all of the cells of the board for external UI implementation
+//!
+//! # Examples
+//!
+//! ```
+//! use checkers_engine::{CheckersEngine, Move, Position, Player};
+//!
+//! let mut engine = CheckersEngine::new();
+//!
+//! let piece_move = Move {
+//!     initial_position: Position{row: 2, column: 1},
+//!     target_position: Position{row: 3, column: 2},
+//! };
+//!
+//! if let Err(error) = engine.play_turn(piece_move, Player::White) {
+//!     println!("Invalid move: {:?}", error);
+//! }
+//!
+//! println!("{}", engine)
+//! ```
 
-use crate::board::{Board, Cell, Move};
-use crate::err::{Error, Result};
-use crate::logic::{self, MoveType, ValidMove};
-use crate::position::Position;
-use crate::state::{Player, State, TurnState, WinState};
+use crate::{
+    board::{Board, Cell, Move},
+    err::{Error, Result},
+    logic::{self, MoveType, ValidMove},
+    position::Position,
+    state::{Player, State, TurnState, WinState},
+};
 
 /// Provides all of the functionalities explained in the module documentation
 pub struct CheckersEngine {
@@ -23,7 +44,7 @@ impl CheckersEngine {
     /// Constructs a checkers board and initializes the state of the game.
     pub fn new() -> Self {
         let board = Board::new();
-        let initial_state = State::NotFinished(TurnState::RegularTurn, Player::Black);
+        let initial_state = State::NotFinished(TurnState::RegularTurn, Player::White);
 
         Self {
             current_state: initial_state,
@@ -43,7 +64,7 @@ impl CheckersEngine {
     /// The API that will allow to play a game of checkers.
     /// Performs multiple validations on the input and performs a move on the board.
     pub fn play_turn(&mut self, piece_move: Move, player: Player) -> Result<State> {
-        if let State::GameOver(_) = self.current_state {
+        if matches!(self.current_state, State::GameOver(_)) {
             return Err(Error::FinishedGame);
         }
 
@@ -65,11 +86,10 @@ impl CheckersEngine {
             .cached_moves
             .iter()
             .find(|valid_move| valid_move.movement == piece_move)
-            .copied()
         {
             Some(valid_move) => {
-                logic::make_move(&mut self.board, valid_move)?;
-                self.calculate_state(valid_move)
+                logic::make_move(&mut self.board, *valid_move)?;
+                self.calculate_state(*valid_move)
             }
             None => Err(Error::InvalidMove),
         }
@@ -145,7 +165,7 @@ mod tests {
         let engine = CheckersEngine::new();
         assert!(matches!(
             engine.state(),
-            State::NotFinished(TurnState::RegularTurn, Player::Black)
+            State::NotFinished(TurnState::RegularTurn, Player::White)
         ));
 
         Ok(())
@@ -170,7 +190,7 @@ mod tests {
                 initial_position: Position { row: 5, column: 1 },
                 target_position: Position { row: 4, column: 0 },
             },
-            Player::White,
+            Player::Black,
         );
         assert!(matches!(result, Err(Error::InvalidPlayerTurn)));
 
@@ -182,10 +202,10 @@ mod tests {
         let mut engine = CheckersEngine::new();
         let result = engine.play_turn(
             Move {
-                initial_position: Position { row: 3, column: 3 },
-                target_position: Position { row: 4, column: 4 },
+                initial_position: Position { row: 4, column: 4 },
+                target_position: Position { row: 3, column: 3 },
             },
-            Player::Black,
+            Player::White,
         );
         assert!(matches!(result, Err(Error::MovingEmptyCell)));
 
@@ -193,12 +213,37 @@ mod tests {
     }
 
     #[test]
-    fn play_turn_failed_moving_enemy_piece() -> Result<()> {
+    fn play_turn_white_failed_moving_black_piece() -> Result<()> {
         let mut engine = CheckersEngine::new();
         let result = engine.play_turn(
             Move {
+                initial_position: Position { row: 2, column: 2 },
+                target_position: Position { row: 1, column: 1 },
+            },
+            Player::White,
+        );
+        assert!(matches!(result, Err(Error::MovingEnemyPiece)));
+
+        Ok(())
+    }
+
+    #[test]
+    fn play_turn_black_failed_moving_white_piece() -> Result<()> {
+        let mut engine = CheckersEngine::new();
+
+        // Play a valid turn and switch turn to black
+        engine.play_turn(
+            Move {
                 initial_position: Position { row: 5, column: 1 },
-                target_position: Position { row: 4, column: 0 },
+                target_position: Position { row: 4, column: 2 },
+            },
+            Player::White,
+        )?;
+
+        let result = engine.play_turn(
+            Move {
+                initial_position: Position { row: 5, column: 5 },
+                target_position: Position { row: 4, column: 4 },
             },
             Player::Black,
         );
@@ -212,10 +257,10 @@ mod tests {
         let mut engine = CheckersEngine::new();
         let result = engine.play_turn(
             Move {
-                initial_position: Position { row: 2, column: 0 },
-                target_position: Position { row: 2, column: 2 },
+                initial_position: Position { row: 5, column: 3 },
+                target_position: Position { row: 2, column: 0 },
             },
-            Player::Black,
+            Player::White,
         );
         assert!(matches!(result, Err(Error::InvalidMove)));
 
@@ -227,14 +272,14 @@ mod tests {
         let mut engine = CheckersEngine::new();
         let state = engine.play_turn(
             Move {
-                initial_position: Position { row: 2, column: 0 },
-                target_position: Position { row: 3, column: 1 },
+                initial_position: Position { row: 5, column: 1 },
+                target_position: Position { row: 4, column: 2 },
             },
-            Player::Black,
+            Player::White,
         )?;
         assert!(matches!(
             state,
-            State::NotFinished(TurnState::RegularTurn, Player::White)
+            State::NotFinished(TurnState::RegularTurn, Player::Black)
         ));
 
         Ok(())
@@ -245,15 +290,15 @@ mod tests {
         let mut engine = CheckersEngine::new();
         engine.play_turn(
             Move {
-                initial_position: Position { row: 2, column: 0 },
-                target_position: Position { row: 3, column: 1 },
+                initial_position: Position { row: 5, column: 1 },
+                target_position: Position { row: 4, column: 2 },
             },
-            Player::Black,
+            Player::White,
         )?;
 
         assert!(matches!(
             engine.state(),
-            State::NotFinished(TurnState::RegularTurn, Player::White)
+            State::NotFinished(TurnState::RegularTurn, Player::Black)
         ));
 
         Ok(())

@@ -1,11 +1,16 @@
 //! This module represents a checker board
-/// A checkers board position will be represented by an absolute (x,y) point.
-/// Meaning - It won't change with perspective on the board
-/// Also, the board is a squared board, meaning there is an equal amount of cells in each axis
-use crate::consts::BOARD_SIZE;
-use crate::piece::{Piece, PieceType};
-use crate::position::Position;
-use crate::state::Player;
+//! A checkers board position will be represented by an absolute (x,y) point.
+//! Meaning - It won't change with perspective on the board
+//! Also, the board is a squared board, meaning there is an equal amount of cells in each axis
+
+use crate::{
+    consts::BOARD_SIZE,
+    piece::{Piece, PieceType},
+    position::Position,
+    state::Player,
+};
+
+use std::array;
 
 /// Represents a position that will grant access to a cell on the board.
 pub type Cell = Option<Piece>;
@@ -22,6 +27,10 @@ const STARTING_WHITE_ROWS: u8 = BOARD_SIZE - STARTING_PIECE_ROWS;
 /// Used In a calculation with a board row,column:
 /// If their sum has a modulu of 0, than it is a black square - meaning a square with a possible piece
 const BLACK_CHECKERS_SQUARES: u8 = 0;
+
+/// Represents the sum of row and column indexes in board
+/// which will determine the color of the checkers board
+const SQUARE_COLOR_MODULU: u8 = 2;
 
 /// Represents a checkers board container
 /// NOTE: a board will not contain checkers logic and will be used as a container of all of the data.
@@ -57,6 +66,9 @@ impl Board {
 
     /// Takes a [`Move`], "cuts" the cell on the initial position of the move
     /// And overrides the cell in the target position with it.
+    /// **NOTE: ** This function does not have logic
+    /// Meaning it will override the target even if there is some piece in there
+    /// And it will also move the initial position even if there is no piece in there
     pub(crate) fn move_cell(&mut self, board_move: Move) {
         let moved_cell = self.pop_cell(board_move.initial_position);
         self[board_move.target_position] = moved_cell;
@@ -64,15 +76,13 @@ impl Board {
 
     /// Returns a vector of all of the cells that represents this board
     pub(crate) fn cells(&self) -> Vec<(Position, Cell)> {
-        let mut cells = Vec::new();
-        for row in 0..BOARD_SIZE {
-            for column in 0..BOARD_SIZE {
-                let position = Position { row, column };
-                cells.push((position, self[position]));
-            }
-        }
-
-        cells
+        (0..BOARD_SIZE)
+            .flat_map(|row| {
+                (0..BOARD_SIZE)
+                    .map(move |column| Position { row, column })
+                    .map(|position| (position, self[position]))
+            })
+            .collect()
     }
 
     /// Overrides the cell of the given position with an empty cell (None)
@@ -82,8 +92,8 @@ impl Board {
 
     // Implemented to keep the "new" constructor clean
     fn initialize_checkers_board() -> Self {
-        let board = std::array::from_fn(|row| {
-            std::array::from_fn(|column| Self::initialize_checkers_piece(row as u8, column as u8))
+        let board = array::from_fn(|row| {
+            array::from_fn(|column| Self::initialize_checkers_piece(row as u8, column as u8))
         });
 
         Self { board }
@@ -92,7 +102,7 @@ impl Board {
     // Helper of initialize_checkers_board.
     // used for initializing a piece on a specific location on the board
     fn initialize_checkers_piece(row: u8, column: u8) -> Cell {
-        if (row + column) % 2 != BLACK_CHECKERS_SQUARES {
+        if (row + column) % SQUARE_COLOR_MODULU != BLACK_CHECKERS_SQUARES {
             return None;
         }
 
@@ -111,9 +121,7 @@ impl Board {
     /// Overrides the cell of the given position with an empty cell (None)
     /// And returns the cell that was previously on there
     fn pop_cell(&mut self, position: Position) -> Cell {
-        let poped_cell = self[position];
-        self[position] = None;
-        poped_cell
+        self[position].take()
     }
 }
 
@@ -147,7 +155,7 @@ impl std::fmt::Display for Board {
         for row in 0..BOARD_SIZE {
             write!(f, "{row}   ")?;
             for column in 0..BOARD_SIZE {
-                if (row + column) % 2 == BLACK_CHECKERS_SQUARES {
+                if (row + column) % SQUARE_COLOR_MODULU == BLACK_CHECKERS_SQUARES {
                     let piece = match self[Position { row, column }] {
                         None => "  ",
                         Some(piece) => &format!("{piece}"),
@@ -177,7 +185,7 @@ mod tests {
     }
 
     #[test]
-    fn new_board_empty_cell_at_non_black_MovingEmptyCell() {
+    fn new_board_empty_cell_at_non_black_cell() {
         let board = Board::new();
         assert_eq!(board[Position { row: 0, column: 1 }], None);
     }

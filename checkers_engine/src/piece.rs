@@ -1,9 +1,11 @@
 //! This module represents the pieces that are being played in checkers
 //! It includes the functionality of upgrading a piece type or dictating the type of movement a piece can do.
 
-use crate::err::{Error, Result};
-use crate::position::MovementDirection::{self, DownLeft, DownRight, UpLeft, UpRight};
-use crate::state::Player;
+use crate::{
+    err::{Error, Result},
+    position::MovementDirection::{self, DownLeft, DownRight, UpLeft, UpRight},
+    state::Player,
+};
 
 /// Represents a type of checkers piece
 #[derive(Debug, PartialEq, Clone, Copy)]

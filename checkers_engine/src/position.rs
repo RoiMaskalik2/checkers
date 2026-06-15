@@ -1,7 +1,9 @@
 //! This module represents the positioning and basic rules of movement in checkers
 
-use crate::consts::{BOARD_SIZE, NEGATIVE_MOVEMENT, POSITIVE_MOVEMENT};
-use crate::err::{Error, Result};
+use crate::{
+    consts::{BOARD_SIZE, NEGATIVE_MOVEMENT, POSITIVE_MOVEMENT},
+    err::{Error, Result},
+};
 
 /// Represents a range of valid board positions (between 0-7 in both AXES of the board)
 const VALID_POSITION_RANGE: std::ops::Range<u8> = 0..BOARD_SIZE;

@@ -23,6 +23,9 @@ dependencies = [
 [[package]]
 name = "checkers_cli"
 version = "0.1.0"
+dependencies = [
+ "checkers_engine",
+]
 
 [[package]]
 name = "checkers_engine"

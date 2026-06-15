@@ -6,15 +6,17 @@
 //! 2. state calculation
 //! 3. checkers board update after performing a move
 
-use crate::board::{Board, Move};
-use crate::consts::{BOARD_SIZE, MAX_TURNS_WITHOUT_EAT};
-use crate::err::{Error, Result};
-use crate::piece::{Piece, PieceType};
-use crate::position::{MovementDirection, Position};
-use crate::state::{Player, State, TurnState, WinState};
+use crate::{
+    board::{Board, Move},
+    consts::{BOARD_SIZE, MAX_TURNS_WITHOUT_EAT},
+    err::{Error, Result},
+    piece::{Piece, PieceType},
+    position::{MovementDirection, Position},
+    state::{Player, State, TurnState, WinState},
+};
 
 /// Represents the types of movements in a checkers game
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) enum MoveType {
     /// A move to an empty position in the board (does not include a game piece)
     Regular,
@@ -24,18 +26,12 @@ pub(crate) enum MoveType {
 }
 
 /// Represents a move that has been validated by the logic of checkers
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub(crate) struct ValidMove {
     /// Validated Move
     pub(crate) movement: Move,
     /// Type of movement that was captured during move validation
     pub(crate) movement_type: MoveType,
-}
-
-impl PartialEq<Move> for ValidMove {
-    fn eq(&self, other: &Move) -> bool {
-        &self.movement == other
-    }
 }
 
 impl ValidMove {
