@@ -80,6 +80,8 @@ pub(crate) fn valid_moves(board: &Board, state: State, player: Player) -> Result
         }
     }
 
+    // Seperate all valid moves to eat moves from regular moves.
+    // It allows to easily return only the eat moves if the vector is not empty
     let (eat_moves, regular_moves): (Vec<_>, Vec<_>) = moves
         .into_iter()
         .partition(|valid_move| matches!(valid_move.movement_type, MoveType::Eat(_)));
@@ -106,9 +108,10 @@ fn player_pieces(
     Ok(board
         .cells()
         .into_iter()
-        .filter_map(|(position, cell)| cell.map(|piece| (position, piece)))
-        .filter(|(_, piece)| piece.owner == player)
-        .map(|(position, piece)| (position, piece.piece_type))
+        .filter_map(|(position, cell)| {
+            let piece = cell?;
+            (piece.owner == player).then(|| (position, piece.piece_type))
+        })
         .collect())
 }
 
