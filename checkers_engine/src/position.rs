@@ -66,7 +66,7 @@ impl Position {
     /// Validates a position
     /// Position is valid if it is not outside of a checkers board
     /// Meaning - both the axes of the position are between 0-7
-    pub(crate) fn validate(position: Position) -> Result<()> {
+    pub fn validate(position: Position) -> Result<()> {
         if !(VALID_POSITION_RANGE.contains(&position.row)
             && VALID_POSITION_RANGE.contains(&position.column))
         {
